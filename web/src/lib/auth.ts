@@ -6,9 +6,11 @@ import { redirect } from "next/navigation";
 import { cache } from "react";
 import { db, sessions, users } from "@/db";
 import { can, type Permission, type Role } from "./permissions";
+import { isHttps } from "./request-info";
 import { decryptSecret, verifyTotp } from "./totp";
 
-const COOKIE = process.env.NODE_ENV === "production" ? "__Host-lsv_session" : "lsv_session";
+// HTTPS : cookie « __Host- » + Secure. HTTP (essai local sur localhost) : cookie simple, sinon le navigateur le refuserait.
+const cookieName = async () => ((await isHttps()) ? "__Host-lsv_session" : "lsv_session");
 const SESSION_HOURS = 8;
 const MAX_FAILS = 5;
 const LOCK_MINUTES = 15;
@@ -51,11 +53,12 @@ async function createSession(userId: string) {
   const token = randomBytes(32).toString("base64url");
   const expiresAt = new Date(Date.now() + SESSION_HOURS * 3600_000);
   await db.insert(sessions).values({ id: sha256(token), userId, expiresAt });
-  (await cookies()).set(COOKIE, token, { httpOnly: true, secure: process.env.NODE_ENV === "production", sameSite: "strict", path: "/", expires: expiresAt });
+  const https = await isHttps();
+  (await cookies()).set(await cookieName(), token, { httpOnly: true, secure: https, sameSite: "strict", path: "/", expires: expiresAt });
 }
 
 export const getUser = cache(async (): Promise<SessionUser | null> => {
-  const token = (await cookies()).get(COOKIE)?.value;
+  const token = (await cookies()).get(await cookieName())?.value;
   if (!token) return null;
   const [row] = await db
     .select({ id: users.id, email: users.email, name: users.name, role: users.role, active: users.active })
@@ -68,9 +71,10 @@ export const getUser = cache(async (): Promise<SessionUser | null> => {
 
 export async function logout() {
   const c = await cookies();
-  const token = c.get(COOKIE)?.value;
+  const name = await cookieName();
+  const token = c.get(name)?.value;
   if (token) await db.delete(sessions).where(eq(sessions.id, sha256(token)));
-  c.delete(COOKIE);
+  c.delete(name);
 }
 
 export async function revokeUserSessions(userId: string) {

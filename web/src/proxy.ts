@@ -4,6 +4,7 @@ import { NextRequest, NextResponse } from "next/server";
 export function proxy(request: NextRequest) {
   const nonce = Buffer.from(crypto.randomUUID()).toString("base64");
   const dev = process.env.NODE_ENV === "development";
+  const https = request.headers.get("x-forwarded-proto")?.split(",")[0].trim() === "https" || request.nextUrl.protocol === "https:";
   const csp = [
     "default-src 'self'",
     `script-src 'self' 'nonce-${nonce}' 'strict-dynamic'${dev ? " 'unsafe-eval'" : ""}`,
@@ -17,7 +18,7 @@ export function proxy(request: NextRequest) {
     "base-uri 'self'",
     "form-action 'self'",
     "frame-ancestors 'none'",
-    ...(dev ? [] : ["upgrade-insecure-requests"]),
+    ...(dev || !https ? [] : ["upgrade-insecure-requests"]),
   ].join("; ");
 
   const headers = new Headers(request.headers);
@@ -25,7 +26,7 @@ export function proxy(request: NextRequest) {
   headers.set("Content-Security-Policy", csp);
   const res = NextResponse.next({ request: { headers } });
   res.headers.set("Content-Security-Policy", csp);
-  if (!dev) res.headers.set("Strict-Transport-Security", "max-age=63072000; includeSubDomains");
+  if (!dev && https) res.headers.set("Strict-Transport-Security", "max-age=63072000; includeSubDomains");
   if (request.nextUrl.pathname.startsWith("/admin")) res.headers.set("Cache-Control", "no-store");
   return res;
 }

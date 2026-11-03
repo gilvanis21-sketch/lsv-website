@@ -5,7 +5,7 @@ Application **Next.js 16 (App Router) + TypeScript**, base **PostgreSQL 16** via
 
 ```
 lsv-website/
-├─ docker-compose.yml            # DÉVELOPPEMENT (db + mailpit + site en mode dev)
+├─ docker-compose.yml            # LOCAL : db + mailpit + site (rapide) ; profil « dev » = rechargement auto
 ├─ docker-compose.prod.yml       # PRODUCTION (caddy, app, db, backup, uptime)
 ├─ ops/                          # Caddyfile, backup/, restore.sh, dc (raccourci)
 ├─ tests/                        # security_suite.py, perf_check.py, browser/ (Playwright + axe)
@@ -23,9 +23,11 @@ lsv-website/
 
 ## 2. Environnement de développement
 ```
-docker compose up -d                   # site http://localhost:3000, admin /admin, mails http://localhost:8025
-docker compose exec web npm test       # tests unitaires
-docker compose exec web npx tsx scripts/seed-demo.mts   # 5 demandes FICTIVES
+docker compose up -d                   # version RAPIDE (build de production) : http://localhost:3000, admin /admin, mails http://localhost:8025
+docker compose up -d --build site      # après une modification du code
+docker compose stop site && docker compose --profile dev up -d web   # mode développement (rechargement auto, plus lent)
+docker compose run --rm migrate npm test                              # tests unitaires
+docker compose run --rm -e NODE_ENV=development migrate npx tsx scripts/seed-demo.mts   # 5 demandes FICTIVES
 ```
 Node n'est pas requis sur le poste : tout s'exécute en conteneur. Variables : `.env` (copie de `.env.example`).
 Après une modification du schéma : `npm run db:generate` (crée la migration dans `web/drizzle/`), commit, puis `db:migrate` (appliqué automatiquement au démarrage).

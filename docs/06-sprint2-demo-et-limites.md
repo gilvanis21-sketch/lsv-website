@@ -7,7 +7,7 @@ cd lsv-website && docker compose up -d      # PostgreSQL + Mailpit + site
 - Site : http://localhost:3000 — Admin : http://localhost:3000/admin
 - Boîte mail de test (Mailpit) : http://localhost:8025
 - Identifiants admin de développement : variables `SEED_ADMIN_EMAIL` / `SEED_ADMIN_PASSWORD` du fichier `.env` (jamais committé).
-- Tests : `docker compose exec web npm test` — données fictives : `docker compose exec web npx tsx scripts/seed-demo.mts`
+- Tests : `docker compose run --rm migrate npm test` — données fictives : `docker compose exec web npx tsx scripts/seed-demo.mts`
 
 ## Ce qui est livré
 Formulaire de demande (validation client + serveur, honeypot, délai minimal, limite 5/10 min/IP, contrôle d'origine), enregistrement en base, référence `LSV-AAAA-XXXXXX`, e-mails admin + demandeur (texte brut, « demande » et non « réservation »), admin (demandes + statuts + notes + export/suppression RGPD + purge, blog + catégories + images + publication planifiée, services, paramètres du site, utilisateurs/rôles, journal d'audit), sessions serveur, Argon2id, verrouillage après 5 échecs, rôles Admin / Éditeur / Secrétariat.

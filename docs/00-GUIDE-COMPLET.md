@@ -64,9 +64,16 @@ Dans un terminal :
 cd /home/home/lsv-website
 docker compose up -d        # démarrer (30 secondes environ)
 docker compose stop         # arrêter
-docker compose logs -f web  # voir ce qui se passe (Ctrl+C pour quitter)
+docker compose logs -f site # voir ce qui se passe (Ctrl+C pour quitter)
 ```
 Il faut que Docker soit lancé. Les données (demandes, articles…) sont conservées entre deux arrêts.
+
+**Vitesse** : par défaut le site est lancé en **version rapide** (la même que la production : une page en ~30 millisecondes). Le mode « développement » est beaucoup plus lent (200 à 440 ms par page, plusieurs Mo de scripts, compilation à la première visite) : ne l'utilisez que pour modifier le code, avec :
+```
+docker compose stop site && docker compose --profile dev up -d web     # mode développement (rechargement automatique)
+docker compose stop web && docker compose up -d site                    # retour au mode rapide
+```
+**Après avoir modifié un fichier du code en mode rapide**, reconstruisez : `docker compose up -d --build site` (1 à 2 minutes).
 
 ### 2.3 Se connecter à l'administration
 - **E-mail** : `admin@lsv.example` (compte de développement fictif)
@@ -83,7 +90,7 @@ Il faut que Docker soit lancé. Les données (demandes, articles…) sont conser
 3. Connectez-vous à `/admin` → **Demandes** : la demande est là, statut « Nouvelle ». Changez son statut.
 4. Essayez **Articles → Nouvel article**, puis regardez-le dans « Actualités ».
 
-*(Pour voir des demandes d'exemple tout de suite : `docker compose exec web npx tsx scripts/seed-demo.mts` crée 5 demandes fictives.)*
+*(Pour voir des demandes d'exemple tout de suite : `docker compose run --rm -e NODE_ENV=development migrate npx tsx scripts/seed-demo.mts` crée 5 demandes fictives.)*
 
 ### 2.5 Mettre le site en ligne (pour que tout le monde y accède)
 Cela demande des décisions et des comptes à ouvrir **au nom du LSV** (domaine, serveur, e-mails, stockage de sauvegardes) : voir `docs/09-exploitation.md` et `docs/12-couts-et-acces.md`. À ne pas faire avant d'avoir levé les points ouverts (§5).
@@ -132,7 +139,7 @@ Quand vous remplacez un texte, **supprimez aussi la balise jaune** `<Tbd />` (ou
 | **Menu de navigation** | `lib/site.ts` (tableau `NAV`) | |
 | **Textes des services au premier démarrage** | `lib/content.ts` (`SERVICES`) | ⚠️ Ne sert **qu'à l'initialisation** d'une base vide. Pour un site déjà démarré : utilisez l'administration (niveau A). |
 
-**Voir le résultat** : en développement, la page se met à jour toute seule dès que vous enregistrez le fichier (rechargez le navigateur). En production, il faut reconstruire : `./ops/dc up -d --build` (voir `docs/09b-guide-mise-a-jour.md`).
+**Voir le résultat** : en mode rapide (par défaut), reconstruisez avec `docker compose up -d --build site`. En mode développement (voir §2.2), la page se met à jour toute seule dès que vous enregistrez le fichier. En production : `./ops/dc up -d --build` (voir `docs/09b-guide-mise-a-jour.md`).
 
 **Références, partenaires, témoignages** (`app/(site)/references/page.tsx`) : la page affiche « Aucun contenu publié ». N'y ajoutez un partenaire ou un témoignage **qu'avec autorisation écrite** ; jamais de données de santé identifiantes.
 

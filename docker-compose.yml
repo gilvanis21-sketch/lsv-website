@@ -12,7 +12,29 @@ services:
   mailpit:
     image: axllent/mailpit:latest
     ports: ["127.0.0.1:8025:8025", "127.0.0.1:1025:1025"]
+  # LANCEMENT RAPIDE (par défaut) : même build que la production (pages en ~30 ms).
+  # Après une modification du code : docker compose up -d --build site
+  migrate:
+    build: { context: ./web, target: tools }
+    env_file: .env
+    command: sh -c "npm run db:migrate && npm run db:seed"
+    restart: "no"
+    depends_on: { db: { condition: service_healthy } }
+  site:
+    build: { context: ./web, target: runner }
+    image: lsv-app:local
+    env_file: .env
+    environment: { UPLOAD_DIR: /data/uploads }
+    volumes: ["uploads:/data/uploads"]
+    ports: ["127.0.0.1:3000:3000"]
+    depends_on:
+      db: { condition: service_healthy }
+      migrate: { condition: service_completed_successfully }
+
+  # MODE DÉVELOPPEMENT (rechargement automatique, plus lent) :
+  #   docker compose stop site && docker compose --profile dev up -d web
   web:
+    profiles: ["dev"]
     image: node:22-alpine
     user: "${LOCAL_UID:-1000}:${LOCAL_GID:-1000}"
     working_dir: /work
@@ -24,3 +46,4 @@ services:
     command: sh -c "npm install --no-audit --no-fund && npm run db:migrate && npm run db:seed && npm run dev"
 volumes:
   pgdata:
+  uploads:

@@ -13,3 +13,9 @@ export function hashIp(ip: string): string {
   if (!secret || secret.length < 32) throw new Error("APP_SECRET manquant ou trop court (>= 32 caractères)");
   return createHmac("sha256", secret).update(ip).digest("hex").slice(0, 32);
 }
+
+/** La requête est-elle arrivée en HTTPS ? (Caddy renseigne X-Forwarded-Proto ; en local direct : http.) */
+export async function isHttps(): Promise<boolean> {
+  const h = await headers();
+  return (h.get("x-forwarded-proto") ?? "").split(",")[0].trim() === "https";
+}
