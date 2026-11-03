@@ -194,8 +194,10 @@ Un développeur web — **ou moi, dans une prochaine session** : donnez-moi les 
 ---
 
 ## 6. Récupérer le projet depuis GitHub (sur une autre machine)
+
+Dépôt **privé** : https://github.com/gilvanis21-sketch/lsv-website (branche `main`). Ouvrez-le avec votre compte GitHub. Pour donner accès à quelqu'un : *Settings → Collaborators*.
 ```
-git clone <adresse-du-dépôt> lsv-website && cd lsv-website
+git clone https://github.com/gilvanis21-sketch/lsv-website.git && cd lsv-website
 cp .env.example .env     # puis renseigner les valeurs (voir ci-dessous)
 docker compose up -d
 ```
