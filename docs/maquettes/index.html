@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>LSV — Maquettes (proposition, contenus provisoires)</title>
+<style>
+:root{--p:#0F4C5C;--pd:#0A3440;--t:#2BB3A8;--tl:#1E8C83;--bg:#F3F6F7;--tx:#1B2A30;--err:#B3261E}
+*{box-sizing:border-box}
+body{margin:0;font:17px/1.6 Inter,system-ui,sans-serif;color:var(--tx);background:#fff}
+h1,h2,h3{font-family:Manrope,Fraunces,Georgia,serif;color:var(--p);line-height:1.2}
+a{color:var(--tl)}
+.wrap{max-width:1100px;margin:0 auto;padding:0 24px}
+.proto{background:#fff6d6;border-bottom:1px solid #e8d68a;padding:8px 24px;font-size:14px;text-align:center}
+.tbd{background:#fff6d6;padding:0 4px;border-radius:3px;font-size:.85em}
+header.nav{border-bottom:1px solid #e3eaec;position:sticky;top:0;background:#fff;z-index:2}
+header.nav .wrap{display:flex;align-items:center;gap:24px;height:68px;flex-wrap:wrap}
+.logo{font-weight:800;color:var(--p);font-size:22px;letter-spacing:.04em}
+nav a{color:var(--tx);text-decoration:none;margin-right:16px;font-size:15px}
+nav a:hover{color:var(--tl)}
+.btn{display:inline-block;padding:12px 22px;border-radius:8px;background:var(--p);color:#fff;text-decoration:none;font-weight:600;border:2px solid var(--p);cursor:pointer;font-size:16px}
+.btn:hover{background:var(--pd)}
+.btn.o{background:#fff;color:var(--p)}
+.btn.o:hover{background:var(--bg)}
+.spacer{margin-left:auto}
+.hero{padding:80px 0 60px;position:relative;overflow:hidden}
+.hero h1{font-size:clamp(32px,5vw,54px);max-width:640px;margin:0 0 16px}
+.hero p{max-width:560px;font-size:19px}
+.hero .cta{display:flex;gap:12px;flex-wrap:wrap;margin-top:28px}
+.wave{position:absolute;right:-40px;top:40px;width:55%;opacity:.9}
+section{padding:64px 0}
+.alt{background:var(--bg)}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:20px}
+.card{border:1px solid #dbe5e8;border-radius:14px;padding:24px;background:#fff}
+.card .ic{width:44px;height:44px;border-radius:10px;background:#e4f5f3;display:grid;place-items:center;margin-bottom:12px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:center}
+.ph{background:linear-gradient(135deg,#dbe9ec,#eef4f5);border-radius:14px;min-height:240px;display:grid;place-items:center;color:#5b7a83;font-size:14px;text-align:center;padding:16px}
+.cta-final{background:var(--p);color:#fff;text-align:center}
+.cta-final h2{color:#fff}
+.cta-final .btn{background:#fff;color:var(--p);border-color:#fff}
+footer{background:var(--pd);color:#cfe3e7;padding:40px 0;font-size:15px}
+footer a{color:#cfe3e7}
+.label{display:inline-block;background:var(--p);color:#fff;padding:4px 12px;border-radius:99px;font-size:13px;margin:40px 0 0}
+form{max-width:620px;display:grid;gap:16px}
+label{font-weight:600;font-size:15px;display:block;margin-bottom:4px}
+input,select{width:100%;padding:12px;border:1px solid #9fb4ba;border-radius:8px;font:inherit}
+input:focus,select:focus,.btn:focus-visible,a:focus-visible{outline:3px solid var(--t);outline-offset:2px}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.notice{background:#e4f5f3;border-left:4px solid var(--t);padding:14px 16px;border-radius:6px}
+.admin{display:grid;grid-template-columns:200px 1fr;border:1px solid #dbe5e8;border-radius:14px;overflow:hidden;font-size:15px}
+.admin aside{background:var(--pd);color:#cfe3e7;padding:20px}
+.admin aside div{padding:6px 0}
+.admin main{padding:20px;background:#fff;overflow-x:auto}
+table{border-collapse:collapse;width:100%}
+th,td{text-align:left;padding:10px;border-bottom:1px solid #e3eaec}
+.pill{padding:2px 10px;border-radius:99px;font-size:13px;color:#fff;white-space:nowrap}
+.n{background:#2a6fb0}.w{background:#9a6a00}.c{background:#2e7d32}.r{background:var(--err)}.d{background:#5f6b70}
+@media(max-width:760px){.two,.row,.admin{grid-template-columns:1fr}.wave{display:none}}
+@media(prefers-reduced-motion:no-preference){.card{transition:transform .2s,box-shadow .2s}.card:hover{transform:translateY(-3px);box-shadow:0 8px 24px rgba(15,76,92,.1)}}
+</style>
+</head>
+<body>
+<div class="proto">MAQUETTE DE PROPOSITION : tous les textes, coordonnées et visuels sont provisoires <span class="tbd">[À CONFIRMER]</span>. Données fictives uniquement.</div>
+
+<header class="nav"><div class="wrap">
+<span class="logo">LSV</span>
+<nav aria-label="Navigation principale"><a href="#">Accueil</a><a href="#">Le laboratoire</a><a href="#">Nos services</a><a href="#">La voix</a><a href="#">POLYMNIVOX</a><a href="#">Actualités</a><a href="#contact">Contact</a></nav>
+<span class="spacer"></span><a class="btn" href="#contact">Prendre rendez-vous</a>
+</div></header>
+
+<span class="wrap"><span class="label">Maquette 1 — Accueil</span></span>
+
+<div class="hero"><div class="wrap">
+<svg class="wave" viewBox="0 0 600 240" aria-hidden="true"><g fill="none" stroke-linecap="round">
+<path d="M0 120 Q40 20 80 120 T160 120 T240 120 T320 120 T400 120 T480 120 T560 120" stroke="#2BB3A8" stroke-width="3"/>
+<path d="M0 120 Q40 60 80 120 T160 120 T240 120 T320 120 T400 120 T480 120 T560 120" stroke="#0F4C5C" stroke-width="2" opacity=".5"/>
+<g stroke="#2BB3A8" stroke-width="5" opacity=".35"><path d="M40 90v60M70 60v120M100 80v80M130 40v160M160 70v100M190 95v50M220 55v130M250 85v70M280 30v180M310 75v90M340 100v40M370 60v120M400 85v70M430 50v140M460 95v50M490 70v100M520 105v30"/></g></g></svg>
+<h1>Comprendre la voix par la mesure <span class="tbd">[titre à valider]</span></h1>
+<p>Le Laboratoire Scientifique de la Voix étudie les caractéristiques mesurables du signal vocal. <span class="tbd">[texte à valider]</span></p>
+<div class="cta"><a class="btn" href="#contact">Prendre rendez-vous</a><a class="btn o" href="#">Découvrir nos services</a></div>
+</div></div>
+
+<section class="alt"><div class="wrap"><h2>Nos prestations</h2>
+<div class="cards">
+<div class="card"><div class="ic">◐</div><h3>Bilan vocal</h3><p>Description provisoire de la prestation. <span class="tbd">[À CONFIRMER]</span></p><a href="#">En savoir plus →</a></div>
+<div class="card"><div class="ic">◑</div><h3>Consultation</h3><p>Description provisoire de la prestation. <span class="tbd">[À CONFIRMER]</span></p><a href="#">En savoir plus →</a></div>
+<div class="card"><div class="ic">◒</div><h3>Suivi vocal</h3><p>Description provisoire de la prestation. <span class="tbd">[À CONFIRMER]</span></p><a href="#">En savoir plus →</a></div>
+</div></div></section>
+
+<section><div class="wrap two">
+<div class="ph">Schéma explicatif POLYMNIVOX<br>enregistrement → biomarqueurs → suivi dans le temps<br>(illustration, aucune fonction)</div>
+<div><h2>POLYMNIVOX</h2><p>Plateforme développée indépendamment, qui vise à transformer un court enregistrement vocal en informations objectives et comparables dans le temps. Présentation à titre informatif uniquement.</p><a class="btn o" href="#">Découvrir POLYMNIVOX</a></div>
+</div></section>
+
+<section class="alt"><div class="wrap two">
+<div><h2>Votre praticien</h2><p>M. Fadi Dahdouh, ostéopathe et chef d'entreprise. <span class="tbd">[parcours et qualifications à fournir : rien n'est affiché sans justificatif]</span></p><a href="#">Le parcours →</a></div>
+<div class="ph">Photo professionnelle<br>[à fournir]</div>
+</div></section>
+
+<section><div class="wrap"><h2>Comprendre les troubles de la voix</h2>
+<div class="cards"><div class="card"><h3>Les dysphonies</h3><p>Contenu pédagogique à valider.</p></div><div class="card"><h3>Troubles de l'émission vocale</h3><p>Contenu pédagogique à valider.</p></div><div class="card"><h3>Autres anomalies</h3><p>Liste à définir avec le client.</p></div></div>
+<p><small>Ces informations sont pédagogiques et ne constituent ni un diagnostic ni une promesse thérapeutique.</small></p></div></section>
+
+<section class="cta-final"><div class="wrap"><h2>Une question, un rendez-vous ?</h2><p>Envoyez-nous une demande, nous reviendrons vers vous pour confirmer un créneau.</p><a class="btn" href="#contact">Demander un rendez-vous</a></div></section>
+
+<footer><div class="wrap">LSV — Laboratoire Scientifique de la Voix · <span class="tbd">[adresse, téléphone, e-mail à confirmer]</span><br><a href="#">Mentions légales</a> · <a href="#">Confidentialité</a> · <a href="#">Cookies</a> · <a href="#">Plan du site</a></div></footer>
+
+<div class="wrap" id="contact"><span class="label">Maquette 2 — Contact / demande de rendez-vous</span>
+<h1>Demander un rendez-vous</h1>
+<div class="notice" style="max-width:620px;margin-bottom:20px"><strong>Ceci est une demande, pas une réservation.</strong> Le créneau n'est confirmé qu'après validation par le laboratoire. N'indiquez aucune information médicale.</div>
+<form onsubmit="return false" aria-label="Demande de rendez-vous">
+<div class="row"><div><label for="n">Nom *</label><input id="n" autocomplete="family-name" required></div><div><label for="p">Prénom *</label><input id="p" autocomplete="given-name" required></div></div>
+<div class="row"><div><label for="e">E-mail *</label><input id="e" type="email" autocomplete="email" required></div><div><label for="t">Téléphone *</label><input id="t" type="tel" autocomplete="tel" required></div></div>
+<fieldset style="border:0;padding:0"><legend style="font-weight:600;font-size:15px">Type de demande *</legend><label style="font-weight:400"><input type="radio" name="ty" style="width:auto"> Première consultation</label><label style="font-weight:400"><input type="radio" name="ty" style="width:auto"> Suivi</label></fieldset>
+<div class="row"><div><label for="d">Créneau souhaité : date</label><input id="d" type="date"></div><div><label for="h">Plage horaire</label><select id="h"><option>Matin</option><option>Après-midi</option></select></div></div>
+<label style="font-weight:400"><input type="checkbox" style="width:auto"> J'ai lu la <a href="#">politique de confidentialité</a> : mes données servent uniquement à traiter ma demande. *</label>
+<p style="color:var(--err);font-size:14px;margin:0" aria-live="polite">(Exemple d'erreur : « Veuillez saisir une adresse e-mail valide. »)</p>
+<div><button class="btn">Envoyer ma demande</button></div>
+<div class="notice">Après envoi : « Votre demande a été reçue. Référence : <strong>LSV-2026-A1B2C3</strong> (exemple fictif). »</div>
+</form></div>
+
+<div class="wrap" style="padding-bottom:60px"><span class="label">Maquette 3 — Administration des demandes</span>
+<h2>Tableau de bord (données fictives)</h2>
+<div class="admin"><aside><strong>LSV Admin</strong><div>▸ Demandes</div><div>Articles</div><div>Services</div><div>Paramètres</div><div>Utilisateurs</div><div>Journal</div></aside>
+<main><table><thead><tr><th>Référence</th><th>Demandeur</th><th>Type</th><th>Créneau</th><th>Statut</th></tr></thead><tbody>
+<tr><td>LSV-2026-A1B2C3</td><td>Test Alpha</td><td>1ʳᵉ consultation</td><td>12/11 matin</td><td><span class="pill n">Nouvelle</span></td></tr>
+<tr><td>LSV-2026-D4E5F6</td><td>Test Bêta</td><td>Suivi</td><td>14/11 après-midi</td><td><span class="pill w">En attente</span></td></tr>
+<tr><td>LSV-2026-G7H8I9</td><td>Test Gamma</td><td>Suivi</td><td>10/11 matin</td><td><span class="pill c">Confirmée</span></td></tr>
+<tr><td>LSV-2026-J1K2L3</td><td>Test Delta</td><td>1ʳᵉ consultation</td><td>08/11 matin</td><td><span class="pill r">Refusée</span></td></tr>
+<tr><td>LSV-2026-M4N5O6</td><td>Test Epsilon</td><td>Suivi</td><td>05/11 après-midi</td><td><span class="pill d">Traitée</span></td></tr>
+</tbody></table></main></div></div>
+</body>
+</html>

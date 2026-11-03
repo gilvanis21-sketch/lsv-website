@@ -1,0 +1,10 @@
+page                             p50     p95     max    taille   enc  erreurs
+/                               149ms    290ms    383ms     8193o  gzip  0
+/nos-services                   131ms    156ms    165ms     5516o  gzip  0
+/nos-services/bilan-vocal       141ms    176ms    186ms     5361o  gzip  0
+/la-voix                        127ms    175ms    191ms     5697o  gzip  0
+/polymnivox                     130ms    174ms    213ms     6352o  gzip  0
+/actualites                     130ms    179ms    197ms     4752o  gzip  0
+/contact                        120ms    146ms    166ms     5859o  gzip  0
+/informations-pratiques         119ms    166ms    194ms     5023o  gzip  0
+/api/health                      41ms     79ms    106ms       15o        0

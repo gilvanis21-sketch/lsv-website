@@ -1,0 +1,90 @@
+# PRODUCTION. Usage : docker compose -f docker-compose.prod.yml --env-file .env.production up -d
+# Voir docs/09-exploitation.md. Les secrets vivent dans .env.production (hors Git).
+name: lsv-prod
+
+x-logging: &logging
+  driver: json-file
+  options: { max-size: "10m", max-file: "5" }
+
+services:
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    ports: ["80:80", "443:443", "443:443/udp"]
+    environment: { DOMAIN: "${DOMAIN}", ACME_EMAIL: "${ACME_EMAIL}" }
+    volumes: ["./ops/Caddyfile:/etc/caddy/Caddyfile:ro", "caddy_data:/data", "caddy_config:/config"]
+    networks: [front]
+    depends_on: [app]
+    logging: *logging
+
+  app:
+    build: { context: ./web, target: runner }
+    image: lsv-app:${APP_VERSION:-local}
+    restart: unless-stopped
+    env_file: .env.production
+    read_only: true
+    tmpfs: ["/tmp", "/app/.next/cache"]
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    volumes: ["uploads:/data/uploads"]
+    networks: [front, back]
+    depends_on:
+      db: { condition: service_healthy }
+      migrate: { condition: service_completed_successfully }
+    logging: *logging
+
+  migrate:
+    build: { context: ./web, target: tools }
+    image: lsv-tools:${APP_VERSION:-local}
+    env_file: .env.production
+    command: npm run db:migrate
+    restart: "no"
+    networks: [back]
+    depends_on: { db: { condition: service_healthy } }
+
+  # Création unique du compte administrateur et des services provisoires :
+  #   docker compose -f docker-compose.prod.yml --profile bootstrap run --rm bootstrap
+  bootstrap:
+    profiles: ["bootstrap"]
+    image: lsv-tools:${APP_VERSION:-local}
+    env_file: .env.production
+    command: npm run db:seed
+    networks: [back]
+    depends_on: { db: { condition: service_healthy } }
+
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    env_file: .env.production
+    volumes: ["pgdata:/var/lib/postgresql/data"]
+    networks: [back]          # réseau interne : aucun accès depuis Internet
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      retries: 20
+    logging: *logging
+
+  backup:
+    build: ./ops/backup
+    image: lsv-backup:${APP_VERSION:-local}
+    restart: unless-stopped
+    env_file: .env.production
+    volumes: ["backups:/backups", "uploads:/data/uploads:ro"]
+    networks: [back, front]   # front : uniquement pour la copie hors site
+    depends_on: { db: { condition: service_healthy } }
+    logging: *logging
+
+  # Supervision : disponibilité + temps de réponse. Accessible en local seulement (tunnel SSH).
+  uptime:
+    image: louislam/uptime-kuma:1
+    restart: unless-stopped
+    ports: ["127.0.0.1:3001:3001"]
+    volumes: ["uptime:/app/data"]
+    networks: [front]
+    logging: *logging
+
+networks:
+  front: {}
+  back: { internal: true }
+
+volumes: { pgdata: {}, uploads: {}, backups: {}, caddy_data: {}, caddy_config: {}, uptime: {} }

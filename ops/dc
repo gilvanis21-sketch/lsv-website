@@ -1,0 +1,8 @@
+#!/bin/sh
+# Raccourci d'exploitation : ./ops/dc ps | logs -f app | restart app | ...
+# Variable LSV_TEST=1 : ajoute la surcouche de test local (boîte mail factice).
+cd "$(dirname "$0")/.." || exit 1
+if [ "${LSV_TEST:-}" = "1" ]; then
+  exec docker compose -f docker-compose.prod.yml -f ops/docker-compose.prod-test.yml --env-file .env.production "$@"
+fi
+exec docker compose -f docker-compose.prod.yml --env-file .env.production "$@"

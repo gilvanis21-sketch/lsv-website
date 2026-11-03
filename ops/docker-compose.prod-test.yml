@@ -1,0 +1,7 @@
+# SURCOUCHE DE TEST LOCAL UNIQUEMENT (jamais en production) : ajoute une boîte mail factice.
+services:
+  mailpit:
+    image: axllent/mailpit:latest
+    networks: [front]
+  app:
+    depends_on: [mailpit]

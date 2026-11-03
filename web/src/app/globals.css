@@ -1,0 +1,25 @@
+@import "tailwindcss";
+
+@theme {
+  --color-petrol: #0f4c5c;
+  --color-petrol-dark: #0a3440;
+  --color-turq: #2bb3a8;
+  --color-turq-text: #17776f; /* turquoise assombri : contraste AA sur blanc */
+  --color-mist: #f3f6f7;
+  --color-ink: #1b2a30;
+  --color-line: #dbe5e8;
+  --font-sans: var(--font-inter), system-ui, sans-serif;
+  --font-display: var(--font-manrope), system-ui, sans-serif;
+}
+
+html { scroll-behavior: smooth; }
+body { color: var(--color-ink); background: #fff; font-size: 1.0625rem; line-height: 1.65; }
+h1, h2, h3 { font-family: var(--font-display); color: var(--color-petrol); line-height: 1.2; font-weight: 700; }
+:focus-visible { outline: 3px solid var(--color-turq); outline-offset: 2px; }
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
+@keyframes drift { from { transform: translateX(0); } to { transform: translateX(-80px); } }
+.wave-anim { animation: drift 12s linear infinite alternate; }

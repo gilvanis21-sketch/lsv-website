@@ -1,0 +1,8 @@
+.env
+.env.*
+!.env.example
+uploads/
+*.log
+*.age
+age-key*.txt
+!.env.production.example
