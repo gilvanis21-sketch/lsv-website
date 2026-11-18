@@ -1,20 +1,28 @@
 #!/bin/sh
-# Sauvegarde chiffrée (age, clé PUBLIQUE uniquement sur le serveur) : base PostgreSQL + images téléversées.
+# Sauvegarde restic (chiffrée, dédupliquée) : base PostgreSQL + images téléversées.
+# Le dépôt restic (RESTIC_REPOSITORY) doit être HORS du serveur en production.
 set -eu
 umask 077
 . /etc/backup.env
-: "${BACKUP_AGE_RECIPIENT:?BACKUP_AGE_RECIPIENT (clé publique age) est requis}"
-DIR=/backups; TS=$(date +%Y%m%d-%H%M%S); mkdir -p "$DIR"
+export RESTIC_CACHE_DIR=/backups/.cache
 export PGPASSWORD="$POSTGRES_PASSWORD"
+DIR=/backups; mkdir -p "$DIR"
 
-pg_dump -h db -U "$POSTGRES_USER" -d "$POSTGRES_DB" --format=custom --no-owner | age -r "$BACKUP_AGE_RECIPIENT" > "$DIR/db-$TS.dump.age.part"
-mv "$DIR/db-$TS.dump.age.part" "$DIR/db-$TS.dump.age"
-tar -C /data -cf - uploads | age -r "$BACKUP_AGE_RECIPIENT" > "$DIR/uploads-$TS.tar.age.part"
-mv "$DIR/uploads-$TS.tar.age.part" "$DIR/uploads-$TS.tar.age"
+# Initialise le dépôt à la première exécution.
+restic cat config >/dev/null 2>&1 || { echo "[backup] initialisation du dépôt restic"; restic init; }
 
-# Rétention
-find "$DIR" -name '*.age' -mtime +"${BACKUP_RETENTION_DAYS:-30}" -delete
+# Base : dump au format custom envoyé directement à restic (aucun fichier clair sur disque).
+pg_dump -h db -U "$POSTGRES_USER" -d "$POSTGRES_DB" --format=custom --no-owner \
+  | restic backup --stdin --stdin-filename db.dump --tag db --host lsv
+# Images téléversées (restic ne retransmet que ce qui a changé).
+restic backup /data/uploads --tag uploads --host lsv
 
-# Copie hors site (OBLIGATOIRE en production : un serveur ne se sauvegarde pas lui-même). Ex. : rclone/rsync.
-if [ -n "${BACKUP_OFFSITE_CMD:-}" ]; then sh -c "$BACKUP_OFFSITE_CMD" || { echo "[backup] ÉCHEC copie hors site"; exit 1; }; fi
-echo "[backup] OK $TS ($(du -h "$DIR/db-$TS.dump.age" | cut -f1) base, $(du -h "$DIR/uploads-$TS.tar.age" | cut -f1) images)"
+# Rétention puis nettoyage.
+restic forget --host lsv --group-by host,tags \
+  --keep-within "${BACKUP_RETENTION_DAYS:-30}d" --keep-monthly "${BACKUP_KEEP_MONTHLY:-12}" --prune
+
+# Vérification d'intégrité légère, le 1er de chaque mois.
+[ "$(date +%d)" = "01" ] && restic check
+
+touch "$DIR/.last-ok"
+echo "[backup] OK $(date +%Y%m%d-%H%M%S)"

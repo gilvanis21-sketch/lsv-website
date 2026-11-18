@@ -1,24 +1,34 @@
-# 09c — Sauvegarde et restauration
+# 09c — Sauvegarde et restauration (restic)
 
 ## Principe
 - **Quoi** : base PostgreSQL (demandes, comptes, articles, services, paramètres, journal) + images téléversées.
-- **Quand** : tous les jours à 02:30 (`BACKUP_CRON`). **Conservation** : 30 jours sur le serveur (`BACKUP_RETENTION_DAYS`).
-- **Chiffrement** : [age](https://age-encryption.org). Le serveur ne détient que la **clé publique** (`BACKUP_AGE_RECIPIENT`) : un attaquant qui prend le serveur ne peut pas lire les sauvegardes.
-- **Hors site** : obligatoire (un serveur ne se sauvegarde pas lui-même). Renseigner `BACKUP_OFFSITE_CMD` (ex. `rclone copy /backups remote:lsv-sauvegardes`). La sauvegarde échoue (et le journal le signale) si la copie échoue.
+- **Outil** : [restic](https://restic.net) — sauvegardes **chiffrées**, **dédupliquées** (seules les données modifiées sont retransmises) et vérifiables. Une « sauvegarde » est un *snapshot* ; la base est étiquetée `db`, les images `uploads`.
+- **Quand** : tous les jours à 02:30 (`BACKUP_CRON`).
+- **Conservation** : tout pendant 30 jours (`BACKUP_RETENTION_DAYS`), puis une sauvegarde par mois pendant 12 mois (`BACKUP_KEEP_MONTHLY`). Le nettoyage (`forget --prune`) est automatique.
+- **Hors site** : le dépôt restic (`RESTIC_REPOSITORY`) doit être **hors du serveur** : S3 compatible (Scaleway, OVH, Wasabi…), Backblaze B2, ou un `rest-server`. Il n'y a plus de commande de copie séparée : restic écrit directement sur le stockage distant, et la sauvegarde **échoue** (signalée dans le journal, service « unhealthy ») si l'écriture échoue.
+- **Intégrité** : `restic check` automatique le 1er de chaque mois.
 
-## Générer la paire de clés (une fois, sur un poste de LSV — pas sur le serveur)
+## Configuration (`.env.production`)
 ```
-docker run --rm --entrypoint age-keygen lsv-backup:local      # ou : age-keygen -o cle-privee-lsv.txt
+RESTIC_REPOSITORY=s3:s3.fr-par.scw.cloud/lsv-sauvegardes     # ou b2:… / rest:…
+RESTIC_PASSWORD=<openssl rand -base64 36>
+AWS_ACCESS_KEY_ID=…        # identifiants du stockage (noms selon le fournisseur)
+AWS_SECRET_ACCESS_KEY=…
 ```
-- La ligne `# public key: age1…` va dans `BACKUP_AGE_RECIPIENT`.
-- La **clé privée** (`AGE-SECRET-KEY-…`) est conservée par LSV à **deux endroits hors serveur** (gestionnaire de mots de passe + coffre/clé USB). **Sans elle, aucune restauration n'est possible.**
+Le dépôt est créé automatiquement à la première sauvegarde.
+
+### ⚠ Le mot de passe restic
+- `RESTIC_PASSWORD` chiffre toutes les sauvegardes. **Sans lui, aucune restauration n'est possible** : le conserver par LSV à **deux endroits hors serveur** (gestionnaire de mots de passe + coffre/clé USB), avec l'adresse du dépôt et les identifiants du stockage.
+- Contrairement à l'ancien système (clé publique `age`), ce mot de passe est **présent sur le serveur** : un attaquant qui prend le serveur pourrait lire les sauvegardes et, selon les droits du stockage, les supprimer. Atténuation : créer pour le serveur des identifiants de stockage **en écriture seule / sans suppression** (ou *Object Lock* / versionnage S3, ou `rest-server --append-only`) ; le nettoyage de rétention se fait alors depuis un poste de confiance (`restic forget --prune`).
 
 ## Vérifier que ça fonctionne
-`./ops/dc ps` → le service `backup` est « healthy » (une sauvegarde de moins de 26 h existe). Lancer à la main : `./ops/dc exec backup /usr/local/bin/backup.sh`. Lister : `./ops/dc exec backup ls -lh /backups`.
+- `./ops/dc ps` → le service `backup` est « healthy » (une sauvegarde complète a réussi il y a moins de 26 h).
+- Lancer à la main : `./ops/dc exec backup /usr/local/bin/backup.sh`.
+- Lister : `./ops/dc exec backup sh -c '. /etc/backup.env; restic snapshots'`.
 
 ## Restaurer — toujours d'abord vers une base de test
 ```
-./ops/restore.sh db-20261103-191819.dump.age /chemin/absolu/cle-privee-lsv.txt
+./ops/restore.sh latest                 # dernière sauvegarde (ou un identifiant de snapshot)
 ```
 Crée la base `lsv_restore_test` (la production n'est pas touchée). Contrôler les données :
 ```
@@ -29,12 +39,15 @@ puis la supprimer : `./ops/dc exec db psql -U lsv -d postgres -c "DROP DATABASE 
 ## Restaurer en PRODUCTION (sinistre) — avec accord écrit
 1. `./ops/dc stop app` (le site s'arrête).
 2. Sauvegarde de l'état actuel si la base répond encore (`backup.sh`).
-3. `./ops/restore.sh <fichier> <clé> lsv` — le script exige de taper `OUI`.
+3. `./ops/restore.sh <snapshot|latest> lsv` — le script exige de taper `OUI`.
 4. `./ops/dc start app` ; vérifier `/api/health`, la connexion admin, le nombre de demandes.
-5. Images : `age -d -i cle.txt uploads-….tar.age | tar -x -C <volume uploads>` (via `./ops/dc run --rm --no-deps --entrypoint sh -v cle:/key.txt:ro backup`).
+5. Images : `./ops/dc run --rm --no-deps --entrypoint sh backup -c 'restic restore latest --tag uploads --target /restore --include /data/uploads'` avec le volume `uploads` monté sur `/restore` (ajouter `-v <volume_uploads>:/restore`), puis déplacer le contenu de `/restore/data/uploads` vers la racine du volume.
 
-## Test de restauration (réalisé le 2026-11-03, voir PV 13)
-Sauvegarde chiffrée → restauration vers base de test → comptage des tables (demandes, comptes, services, journal) et référence d'une demande **identiques** à la production ; **mauvaise clé refusée** (`no identity matched`) ; archive d'images déchiffrée et lisible. À refaire **chaque mois** et après tout changement d'hébergeur.
+## Serveur perdu : restaurer sur une nouvelle machine
+Il faut seulement les 3 éléments conservés par LSV : adresse du dépôt, identifiants du stockage, `RESTIC_PASSWORD`. Les renseigner dans un nouveau `.env.production`, démarrer `db` et `backup`, puis suivre la procédure ci-dessus.
+
+## Test de restauration
+Procédure à **refaire sur le serveur final** puis **chaque mois** et après tout changement d'hébergeur. Contrôler : comptage des tables (demandes, comptes, services, journal) identique à la production ; **mauvais mot de passe refusé** (`wrong password or no key found`). Le test local du 2026-11-18 (sauvegarde ×2, déduplication, rétention, dump lisible par `pg_restore`) est concluant ; l'ancien test du 2026-11-03 (PV 13) concernait le système `age`.
 
 ## Urgence : perte de toutes les 2FA / de tous les mots de passe admin
 Sur le serveur : `./ops/dc exec db psql -U lsv -d lsv -c "update users set totp_enabled=false, totp_secret=null where email='admin@…'"` puis se connecter avec le mot de passe, ou créer un nouvel admin via le profil `bootstrap` avec de nouvelles variables `SEED_ADMIN_*` (puis les retirer). À journaliser et à signaler au client.

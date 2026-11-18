@@ -34,7 +34,7 @@ Vous avez répondu « oui » au passage au Sprint 3 sans trancher les trois poin
 1. **Durée de conservation des demandes : 12 mois** (provisoire) ;
 2. **pas de CAPTCHA** (anti-spam maison) ;
 3. **2FA ajoutée**, mais non imposée à tous les comptes.
-Autres choix : SMTP quelconque (Mailpit en dev), sauvegarde `age` + copie hors site obligatoire, supervision par Uptime Kuma auto-hébergé.
+Autres choix : SMTP quelconque (Mailpit en dev), sauvegarde `restic` vers un dépôt hors site obligatoire, supervision par Uptime Kuma auto-hébergé.
 
 ## 5. Restes à faire avant mise en production (par ordre de priorité)
 1. **Avis juridique HDS** + validation RGPD (mentions légales, confidentialité, durées).

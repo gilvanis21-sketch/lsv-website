@@ -24,7 +24,7 @@ Trois options ont été comparées par une matrice pondérée sur 10 critères (
 | Conteneurs | Docker, Docker Compose | Même image en local et en production |
 | Reverse proxy | Caddy | HTTPS automatique (Let's Encrypt) |
 | Tests | Vitest, Python (sécurité, performance), Playwright + axe | Voir 1.5 |
-| Exploitation | Shell, `age` (chiffrement), Uptime Kuma | Sauvegardes, restauration, supervision |
+| Exploitation | Shell, `restic` (sauvegardes chiffrées), Uptime Kuma | Sauvegardes, restauration, supervision |
 
 ### 1.3 Organisation du code
 ```
@@ -49,7 +49,7 @@ lsv-website/
 - **Demande de rendez-vous** : formulaire sans motif médical → validation Zod → anti-spam (champ piège, délai minimal de 3 s, limitation de débit) → enregistrement avec référence (`LSV-2026-XXXXXX`) → deux e-mails.
 - **Administration** (`/admin`) : demandes (5 statuts), articles, catégories, services, paramètres (coordonnées, horaires, tarifs), utilisateurs et rôles (Administrateur, Éditeur, Secrétariat), journal d'audit. RGPD : export et suppression d'une demande, purge automatique (`db:purge`, durée `REQUEST_RETENTION_MONTHS`, 12 mois provisoire).
 - **Sécurité** : CSP stricte avec nonce par requête, HSTS en HTTPS, en-têtes (`nosniff`, `X-Frame-Options`, `Referrer-Policy`, `Permissions-Policy`), verrouillage après erreurs de connexion, images contrôlées (3 Mo, JPEG/PNG/WebP), conteneur applicatif non-root et en lecture seule, base de données sur un réseau Docker interne.
-- **Production prête, non déployée** : sauvegarde quotidienne chiffrée (`age`), restauration scriptée et testée, supervision Uptime Kuma.
+- **Production prête, non déployée** : sauvegarde quotidienne chiffrée (`restic`), restauration scriptée et testée, supervision Uptime Kuma.
 
 ### 1.5 Résultats de tests (3 novembre 2026, poste de développement)
 26/26 tests unitaires · 79/79 contrôles de sécurité · 108/108 tests navigateurs (Chromium, Firefox, WebKit ; mobile, tablette, ordinateur) · 0 anomalie axe (WCAG 2.2 AA) · 0 vulnérabilité des dépendances de production · 95 % des pages en moins de 0,3 s · restauration de sauvegarde : données identiques.
@@ -159,7 +159,7 @@ docker compose exec -T db sh -c 'psql -U "$POSTGRES_USER" "$POSTGRES_DB"' < lsv-
 Coût indicatif 8 à 30 € / mois (à vérifier). Hébergeurs UE courants : OVHcloud, Scaleway, Hetzner, Infomaniak. Étapes, détaillées dans `09-exploitation.md` :
 1. Louer un VPS Linux (2 vCPU, 2 à 4 Go), installer Docker + Compose, clé SSH, pare-feu (ouvrir 22, 80, 443 uniquement).
 2. Acheter le domaine ; créer les enregistrements DNS `A` (et `AAAA`) pour `domaine` et `www.domaine` vers l'IP du serveur.
-3. Cloner le dépôt sur le serveur ; `cp .env.production.example .env.production` ; remplir (`DOMAIN`, `ACME_EMAIL`, secrets, SMTP réel, clé **publique** `age`, `BACKUP_OFFSITE_CMD`) ; `chmod 600`.
+3. Cloner le dépôt sur le serveur ; `cp .env.production.example .env.production` ; remplir (`DOMAIN`, `ACME_EMAIL`, secrets, SMTP réel, `RESTIC_REPOSITORY`, `RESTIC_PASSWORD`) ; `chmod 600`.
 4. `./ops/dc up -d --build` puis `./ops/dc --profile bootstrap run --rm bootstrap` (création unique du compte admin), puis supprimer `SEED_ADMIN_*`.
 5. Vérifier `https://domaine/api/health`, la redirection HTTPS, la connexion `/admin`, l'envoi d'un vrai e-mail ; activer la 2FA ; configurer Uptime Kuma ; tester une restauration.
 

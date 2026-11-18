@@ -9,5 +9,6 @@ Site vitrine + gestion des demandes de rendez-vous. Next.js 16 · PostgreSQL · 
   - Accès : http://localhost:3000 · admin `/admin` · mails de test http://localhost:8025
 - **Démarrer manuellement** : `cp .env.example .env` (remplir) puis `docker compose up -d`
 - **Documentation** : [`docs/`](docs/) — commencer par `14-rapport-final.md`, puis `07` (technique), `08` (utilisateur), `09*` (exploitation), `13` (recette).
+- **Sauvegardes** : [restic](https://restic.net) (chiffrées, dédupliquées) vers un dépôt hors site ; configuration `RESTIC_REPOSITORY` / `RESTIC_PASSWORD` dans `.env.production`. Restauration : `./ops/restore.sh latest`. Voir `docs/09c-sauvegarde-restauration.md`.
 - **Production** : `docker-compose.prod.yml` et `docs/09-exploitation.md`. **Rien n'est déployé à ce jour.**
 - **Données** : exclusivement fictives en développement. Aucun secret dans le dépôt (`.env*` ignorés).

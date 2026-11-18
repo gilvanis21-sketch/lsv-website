@@ -29,7 +29,7 @@ Principe : **tout est au nom de LSV** ; le prestataire n'en conserve aucun à la
 | Comptes administrateur du site (≥ 2 administrateurs, 2FA) | LSV | À créer au déploiement |
 | Fournisseur d'e-mails (SMTP) | LSV | `[À choisir]` |
 | Stockage de sauvegardes hors site | LSV | `[À choisir]` |
-| **Clé privée de sauvegarde (age)** — 2 copies hors serveur | LSV (dirigeant) | À générer par LSV (09c) |
+| **Mot de passe du dépôt restic** — 2 copies hors serveur | LSV (dirigeant) | À générer et conserver par LSV (09c) |
 | Uptime Kuma (compte + alertes e-mail) | LSV | À configurer |
 | Fichier `.env.production` (secrets) — copie dans le gestionnaire de mots de passe de LSV | LSV | À constituer |
 | Google Business Profile / réseaux sociaux (SEO local) | LSV | `[À fournir]` |

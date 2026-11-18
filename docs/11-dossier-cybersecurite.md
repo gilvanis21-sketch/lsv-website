@@ -19,7 +19,7 @@ Périmètre : site vitrine + espace d'administration + base de données + sauveg
 | Interception | HTTPS Caddy (TLS auto), HSTS 2 ans, redirection HTTP→HTTPS, `upgrade-insecure-requests` | Test local de production |
 | Clickjacking / divers | `X-Frame-Options: DENY`, `frame-ancestors 'none'`, `nosniff`, `Referrer-Policy`, `Permissions-Policy` | Suite sécurité |
 | Compromission d'un conteneur | Utilisateur non-root, système de fichiers en **lecture seule**, `cap_drop: ALL`, `no-new-privileges`, base **sans port publié** (réseau interne) | Inspection du conteneur |
-| Perte / vol de sauvegardes | Chiffrement `age` (clé privée hors serveur) ; fichiers en `0600` | Test de restauration (mauvaise clé refusée) |
+| Perte / vol de sauvegardes | Chiffrement `restic` (mot de passe conservé hors serveur ; stockage distant en écriture seule recommandé) | Test de restauration (mauvaise clé refusée) |
 | Chaîne d'approvisionnement | `npm audit --omit=dev` : **0 vulnérabilité** ; versions verrouillées (`package-lock.json`) ; peu de dépendances directes | Audit du 2026-11-03 |
 | Secrets | Hors Git (`.gitignore`), `chmod 600`, jamais dans l'image ; `APP_SECRET` ≥ 32 car. exigé | Revue |
 
